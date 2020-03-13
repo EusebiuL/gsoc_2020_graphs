@@ -78,7 +78,7 @@ fabric.properties
 # modules.xml
 # .idea/misc.xml
 # *.ipr
-
+.idea
 # Sonarlint plugin
 .idea/**/sonarlint/
 
@@ -93,5 +93,7 @@ fabric.properties
 *.class
 *.log
 *.metals
+
+target/
 
 # End of https://www.gitignore.io/api/scala,intellij
