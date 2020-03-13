@@ -6,7 +6,6 @@ trait Parser[T] {
   def parse(fileAsString: String): Either[Parser.Failure, Seq[T]]
 }
 
-
 final class CsvParser[T] extends Parser[T] {
 
   override def parse(fileAsString: String): Either[Parser.Failure, Seq[T]] = Parser.parse[T](fileAsString)
