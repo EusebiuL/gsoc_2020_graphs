@@ -20,18 +20,19 @@ trait GraphOps[T <: Model] {
 
 }
 
-final class GremlinGraph[T <: Model](private implicit val graph: ScalaGraph)(implicit ec: ExecutionContext) extends GraphOps[T] {
+final class GremlinGraph[T <: Model](private implicit val graph: ScalaGraph)(implicit ec: ExecutionContext)
+    extends GraphOps[T] {
 
   override def constructGraph(vertices: Seq[T]): Future[ScalaGraph] = Future.successful {
-    vertices.map{
+    vertices.map {
       case alert: Alert => {
         //add vertices
-        val firstVertex  = graph + alert.field1
+        val firstVertex = graph + alert.field1
         val secondVertex = graph + alert.field2
-        val thirdVertex  = graph + alert.field3
+        val thirdVertex = graph + alert.field3
 
         //add edges
-        secondVertex  --- "is" --> firstVertex
+        secondVertex --- "is" --> firstVertex
         thirdVertex --- "is" --> firstVertex
         secondVertex --- "knows" --> thirdVertex
 
