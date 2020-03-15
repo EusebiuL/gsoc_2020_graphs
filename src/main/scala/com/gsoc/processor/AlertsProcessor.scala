@@ -13,9 +13,10 @@ import scala.util.Try
 
 final class AlertsProcessor(implicit ec: ExecutionContext) {
 
-  def startProcessor: Future[ScalaGraph] = {
+  def startProcessor[T <: Model](graph: GremlinGraph[T]): Future[ScalaGraph] = {
 
     for {
+
       fileProcessor <- Future.fromTry {
         Try {
           scala.io.Source.fromURI(URI.create("./data/alerts.csv"))(StandardCharsets.UTF_8)
@@ -26,12 +27,11 @@ final class AlertsProcessor(implicit ec: ExecutionContext) {
       }
       fileAsString = fileProcessor.mkString
       parsedModel <- Future.successful {
-        new CsvParser[Model].parse(fileAsString)
+        new CsvParser[T].parse(fileAsString)
       }
       model <- parsedModel.fold(
-        _ => Future.failed[Seq[Model]](new RuntimeException("Failed at parsing csv")),
-        sm => Future.successful[Seq[Model]](sm))
-      graph = GremlinGraph[Model]
+        _ => Future.failed[Seq[T]](new RuntimeException("Failed at parsing csv")),
+        sm => Future.successful[Seq[T]](sm))
       constructedGraph <- graph.constructGraph(model)
     } yield constructedGraph
 
