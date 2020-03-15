@@ -7,13 +7,14 @@ import com.gsoc.csv.CsvParser
 import com.gsoc.gremlin.GremlinGraph
 import com.gsoc.model.Model
 import gremlin.scala.ScalaGraph
+import zamblauskas.csv.parser.ColumnReads
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 final class AlertsProcessor(implicit ec: ExecutionContext) {
 
-  def startProcessor[T <: Model](graph: GremlinGraph[T]): Future[ScalaGraph] = {
+  def startProcessor[T <: Model](graph: GremlinGraph[T])(implicit cr: ColumnReads[T]): Future[ScalaGraph] = {
 
     for {
 

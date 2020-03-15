@@ -1,19 +1,21 @@
 package com.gsoc.csv
 
+import com.gsoc.model.Model
 import zamblauskas.csv.parser._
 
-trait Parser[T] {
-  def parse(fileAsString: String): Either[Parser.Failure, Seq[T]]
+
+trait Parser[T <: Model] {
+  def parse(fileAsString: String)(implicit cr: ColumnReads[T]): Either[Parser.Failure, Seq[T]]
 }
 
-final class CsvParser[T] extends Parser[T] {
+final class CsvParser[T <: Model] extends Parser[T] {
 
-  override def parse(fileAsString: String): Either[Parser.Failure, Seq[T]] = Parser.parse[T](fileAsString)
+   def parse(fileAsString: String)(implicit cr: ColumnReads[T]): Either[Parser.Failure, Seq[T]] = Parser.parse[T](fileAsString)(cr)
 
 }
 
-final class CsvParserMock[T] extends Parser[T] {
+final class CsvParserMock[T <: Model] extends Parser[T] {
 
-  override def parse(fileAsString: String): Either[Parser.Failure, Seq[T]] = Right(Seq.empty[T])
+  override def parse(fileAsString: String)(implicit cr: ColumnReads[T]): Either[Parser.Failure, Seq[T]] = Right(Seq.empty[T])
 
 }

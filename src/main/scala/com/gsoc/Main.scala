@@ -1,7 +1,7 @@
 package com.gsoc
 
 import com.gsoc.gremlin.GremlinGraph
-import com.gsoc.model.Model
+import com.gsoc.model.{Alert, Model}
 import com.gsoc.processor.AlertsProcessor
 import org.apache.commons.configuration.PropertiesConfiguration
 
@@ -22,9 +22,9 @@ object Main {
         case e: Throwable => throw new RuntimeException(s"Exception when reading config file: ${e.getLocalizedMessage}")
       }
 
-      graph = GremlinGraph[Model](conf)
+      graph = GremlinGraph[Alert](conf)
       processor = new AlertsProcessor
-    } yield processor.startProcessor[Model](graph)
+    } yield processor.startProcessor[Alert](graph)(Alert.alertReads)
   }
 
 }
