@@ -20,7 +20,7 @@ trait GraphOps[T <: Model] {
 
 }
 
-final class GremlinGraph[T <: Model](private implicit val graph: ScalaGraph)(implicit ec: ExecutionContext)
+final class GremlinGraph[T <: Model](private[this] implicit val graph: ScalaGraph)(implicit ec: ExecutionContext)
     extends GraphOps[T] {
 
   override def constructGraph(vertices: Seq[T]): Future[ScalaGraph] = Future.successful {
