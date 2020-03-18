@@ -4,6 +4,7 @@ HBASE_CONTAINER_NAME=hbase-master
 JANUS_CONTAINER_NAME=janusgraph-default
 
 
+
 mkdir -p ~/data/hbase
 
 if [ "$(docker ps -aq -f name=$HBASE_CONTAINER_NAME)" ]; then
@@ -14,11 +15,10 @@ if [ "$(docker ps -aq -f name=$HBASE_CONTAINER_NAME)" ]; then
 	echo "Starting hbase container"
 	docker start $HBASE_CONTAINER_NAME
 else
-docker run -d --name $HBASE_CONTAINER_NAME -h $HBASE_CONTAINER_NAME -p 16010:16010 \
+docker run -d --name $HBASE_CONTAINER_NAME -h $HBASE_CONTAINER_NAME  -e JAVA_OPTS="-Djute.maxbuffer=10000000 -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true" -p 16010:16010 \
        -v $HOME/data/hbase:/data \
-       gelog/hbase hbase master start && \
+       gelog/hbase hbase master start
 
-docker logs -f $HBASE_CONTAINER_NAME
 fi
 
 if [ "$(docker ps -aq -f name=$JANUS_CONTAINER_NAME)" ]; then
@@ -29,6 +29,6 @@ if [ "$(docker ps -aq -f name=$JANUS_CONTAINER_NAME)" ]; then
 	echo "Starting janusgraph container"
 	docker start $JANUS_CONTAINER_NAME
 else
-docker run --name $JANUS_CONTAINER_NAME janusgraph/janusgraph:latest
+docker run -d --name $JANUS_CONTAINER_NAME janusgraph/janusgraph:latest
 
 fi
