@@ -2,8 +2,11 @@ package com.gsoc.gremlin
 
 import com.gsoc.model.{Alert, Model}
 import gremlin.scala._
-import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph
 import org.apache.commons.configuration.Configuration
+import org.apache.tinkerpop.gremlin.structure.util.GraphFactory
+import org.apache.tinkerpop.gremlin.structure.util.empty.EmptyGraph
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph
+
 import scala.concurrent.{ExecutionContext, Future}
 
 trait GraphOps[T <: Model] {
@@ -54,7 +57,7 @@ final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: Executi
 
 object GremlinGraph {
 
-  private[this] def graph(conf: Configuration): ScalaGraph = TinkerGraph.open(conf).asScala
+  def graph(conf: Configuration): ScalaGraph = EmptyGraph.instance().asScala  //GraphFactory.open(conf).asScala // TinkerGraph.open(conf).asScala
 
   def apply[T <: Model](conf: Configuration)(implicit ec: ExecutionContext): GremlinGraph[T] = {
     implicit val graphParam: ScalaGraph = graph(conf)
@@ -62,3 +65,4 @@ object GremlinGraph {
   }
 
 }
+
