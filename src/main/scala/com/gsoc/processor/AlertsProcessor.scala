@@ -1,8 +1,7 @@
 package com.gsoc.processor
 
-import java.net.URI
 import java.nio.charset.StandardCharsets
-import java.nio.file.{Path, Paths}
+import java.nio.file.Paths
 
 import com.gsoc.csv.CsvParser
 import com.gsoc.gremlin_graph.GremlinGraph
@@ -11,7 +10,7 @@ import gremlin.scala.ScalaGraph
 import zamblauskas.csv.parser.ColumnReads
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Try}
+import scala.util.Try
 
 final class AlertsProcessor(implicit ec: ExecutionContext) {
 
@@ -29,10 +28,9 @@ final class AlertsProcessor(implicit ec: ExecutionContext) {
         }
       }
       fileAsString = fileProcessor.mkString
-      lines <- Future{ new CsvParser[T]().parse(fileAsString)) }
-      parsedLines <- lines.fold(e => Failure(new RuntimeException(e.message)), s => Try(s))
-      _ <- Try(println(parsedLines))
-      constructedGraph <- Try(graph.constructGraph(parsedLines))
+      lines <- Future{ new CsvParser[T]().parse(fileAsString) }
+      parsedLines <- lines.fold(e => Future.failed(new RuntimeException(e.message)), s => Future.successful(s))
+      constructedGraph <- graph.constructGraph(parsedLines)
     } yield constructedGraph
 
   }
