@@ -1,4 +1,4 @@
-package com.gsoc.model
+package com.gsoc.models
 
 import zamblauskas.csv.parser.{ColumnReads, column}
 import zamblauskas.functional._
