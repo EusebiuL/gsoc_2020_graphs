@@ -1,6 +1,8 @@
 package com.gsoc.csv
 
-import com.gsoc.model.Model
+import com.gsoc.models.Model
+
+import scala.util.Try
 import zamblauskas.csv.parser._
 
 
@@ -19,3 +21,4 @@ final class CsvParserMock[T <: Model] extends Parser[T] {
   override def parse(fileAsString: String)(implicit cr: ColumnReads[T]): Either[Parser.Failure, Seq[T]] = Right(Seq.empty[T])
 
 }
+

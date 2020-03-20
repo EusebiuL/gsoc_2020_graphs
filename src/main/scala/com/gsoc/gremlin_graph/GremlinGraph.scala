@@ -1,11 +1,11 @@
-package com.gsoc.gremlin
+package com.gsoc.gremlin_graph
 
-import com.gsoc.model.{Alert, Model}
+import com.gsoc.models.{Alert, Model}
 import gremlin.scala._
 import org.apache.commons.configuration.Configuration
-import org.apache.tinkerpop.gremlin.structure.util.GraphFactory
-import org.apache.tinkerpop.gremlin.structure.util.empty.EmptyGraph
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph
+import org.janusgraph.core.JanusGraphFactory
+
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -26,7 +26,7 @@ trait GraphOps[T <: Model] {
 final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: ExecutionContext)
     extends GraphOps[T] {
 
-  override def constructGraph(vertices: Seq[T]): Future[ScalaGraph] = Future.successful {
+  override def constructGraph(vertices: Seq[T]): Future[ScalaGraph] =  Future {
     vertices.map {
       case alert: Alert => {
         //add vertices
@@ -38,6 +38,7 @@ final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: Executi
         secondVertex --- "is" --> firstVertex
         thirdVertex --- "is" --> firstVertex
         secondVertex --- "knows" --> thirdVertex
+
 
       }
       case _ => throw new RuntimeException("Wrong model")
@@ -57,7 +58,8 @@ final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: Executi
 
 object GremlinGraph {
 
-  def graph(conf: Configuration): ScalaGraph = EmptyGraph.instance().asScala  //GraphFactory.open(conf).asScala // TinkerGraph.open(conf).asScala
+  def graph(conf: Configuration): ScalaGraph = TinkerGraph.open(conf).asScala //FIXME: add JanusGraphFactory.open(conf).asScala once I figure out the problem for "Packet <len12343123123> is out of range" o.O
+
 
   def apply[T <: Model](conf: Configuration)(implicit ec: ExecutionContext): GremlinGraph[T] = {
     implicit val graphParam: ScalaGraph = graph(conf)
