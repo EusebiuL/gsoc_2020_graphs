@@ -4,7 +4,7 @@ import com.gsoc.models.{Alert, Model}
 import gremlin.scala._
 import org.apache.commons.configuration.Configuration
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph
-import org.janusgraph.core.JanusGraphFactory
+//import org.janusgraph.core.JanusGraphFactory
 
 
 import scala.concurrent.{ExecutionContext, Future}
