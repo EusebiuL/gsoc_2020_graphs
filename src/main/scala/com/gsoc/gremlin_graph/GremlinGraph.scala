@@ -61,9 +61,9 @@ object GremlinGraph {
   def graph(conf: Configuration): ScalaGraph = TinkerGraph.open(conf).asScala //FIXME: add JanusGraphFactory.open(conf).asScala once I figure out the problem for "Packet <len12343123123> is out of range" o.O
 
 
-  def apply[T <: Model](conf: Configuration)(implicit ec: ExecutionContext): GremlinGraph[T] = {
+  def apply[T <: Model](conf: Configuration)(implicit ec: ExecutionContext): Future[GremlinGraph[T]] = {
     implicit val graphParam: ScalaGraph = graph(conf)
-    new GremlinGraph[T]
+    Future.successful(new GremlinGraph[T])
   }
 
 }

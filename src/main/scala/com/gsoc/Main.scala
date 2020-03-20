@@ -1,10 +1,11 @@
 package com.gsoc
 
+import java.util.concurrent.Executors
+
 import com.gsoc.gremlin_graph.GremlinGraph
 import com.gsoc.models.Alert
 import com.gsoc.processor.AlertsProcessor
 import org.apache.commons.configuration.PropertiesConfiguration
-import org.apache.tinkerpop.gremlin.structure.util.empty.EmptyGraph
 import org.slf4j.{Logger, LoggerFactory}
 import gremlin.scala._
 
@@ -14,7 +15,7 @@ import scala.util.{Failure, Success, Try}
 object Main {
 
   def main(args: Array[String]): Unit = {
-    implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+    implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(3)) //TODO: make this configurable
     val logger: Logger = LoggerFactory.getLogger(getClass)
 
     val result = for {
@@ -26,7 +27,7 @@ object Main {
         case e: Throwable => throw new RuntimeException(s"Exception when reading config file: ${e.getLocalizedMessage}")
       }
 
-      graph =  GremlinGraph[Alert](conf)
+      graph <- GremlinGraph[Alert](conf)
       processor = new AlertsProcessor()
       result <- processor.startProcessor[Alert](graph)(Alert.alertReads)
     } yield result
