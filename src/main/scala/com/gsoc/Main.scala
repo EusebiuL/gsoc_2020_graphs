@@ -46,11 +46,12 @@ object Main {
             //TODO: refactor this to a method in GremlinGraph
           }
         }
-        System.exit(0)
+        sys.exit(0)
       }
       case Failure(exception) => {
         throw new RuntimeException(exception.getLocalizedMessage)
-        System.exit(0)
+        sys.exit(0)
+
       }
     }
 

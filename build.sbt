@@ -20,6 +20,7 @@ lazy val graph = (project in file("."))
     ),
     mainClass in Compile := Some("com.gsoc.Main"),
     resolvers += Resolver.bintrayRepo("zamblauskas", "maven"),
+    fork in run := true,
     libraryDependencies ++= Seq(
       "com.michaelpollmeier" %% "gremlin-scala" % gremlinV withSources(),
       "org.apache.tinkerpop" % "gremlin-core" % "3.4.4" withSources(),
