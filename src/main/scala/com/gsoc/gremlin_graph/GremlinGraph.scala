@@ -17,7 +17,7 @@ trait GraphOps[T <: Model] {
 
   def computeVertexDegree(vertexLabel: Vertex): Future[Degree]
 
-  def computeNumberOfAdjacentVertexes(vertex: Vertex): Future[Long]
+  def computeNumberOfAdjacentVertices(vertex: Vertex): Future[Long]
 
   def extractVertexSubgraph(vertex: Vertex): Future[ScalaGraph]
 
@@ -51,11 +51,11 @@ final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: Executi
     for {
       inDegreeList <- vertex.inE.count.dedup().promise
       outDegreeList <- vertex.outE.count.promise
-      in = inDegreeList.head
-      out = outDegreeList.head
-    } yield Degree(in, out, in + out)
+      inDegree = inDegreeList.head
+      outDegree = outDegreeList.head
+    } yield Degree(inDegree, outDegree, inDegree + outDegree)
 
-  override def computeNumberOfAdjacentVertexes(vertex: Vertex): Future[Long] = ???
+  override def computeNumberOfAdjacentVertices(vertex: Vertex): Future[Long] = ???
 
   override def extractVertexSubgraph(vertex: Vertex): Future[ScalaGraph] = ???
 
