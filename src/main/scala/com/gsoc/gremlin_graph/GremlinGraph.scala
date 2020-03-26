@@ -1,6 +1,6 @@
 package com.gsoc.gremlin_graph
 
-import com.gsoc.models.{Alert, Model}
+import com.gsoc.models.{Alert, Degree, Model}
 import gremlin.scala._
 import org.apache.commons.configuration.Configuration
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph
