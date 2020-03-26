@@ -5,7 +5,7 @@ import gremlin.scala._
 import org.apache.commons.configuration.Configuration
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph
 //import org.janusgraph.core.JanusGraphFactory
-
+import cats.implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -15,7 +15,7 @@ trait GraphOps[T <: Model] {
 
   def findLongestChain(graph: ScalaGraph): Future[Seq[Vertex]]
 
-  def computeVertexDegree(vertex: Vertex, graph: ScalaGraph): Future[Degree]
+  def computeVertexDegree(vertexLabel: Vertex): Future[Option[Degree]]
 
   def computeNumberOfAdjacentVertexes(vertex: Vertex): Future[Long]
 
@@ -23,10 +23,9 @@ trait GraphOps[T <: Model] {
 
 }
 
-final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: ExecutionContext)
-    extends GraphOps[T] {
+final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: ExecutionContext) extends GraphOps[T] {
 
-  override def constructGraph(vertices: Seq[T]): Future[ScalaGraph] =  Future {
+  override def constructGraph(vertices: Seq[T]): Future[ScalaGraph] = Future {
     vertices.map {
       //TODO: add conditions for when the value read is None
       case alert: Alert => {
@@ -40,7 +39,6 @@ final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: Executi
         thirdVertex --- "is" --> firstVertex
         secondVertex --- "knows" --> thirdVertex
 
-
       }
       case _ => throw new RuntimeException("Wrong model")
     }
@@ -49,7 +47,17 @@ final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: Executi
 
   override def findLongestChain(graph: ScalaGraph): Future[Seq[Vertex]] = ???
 
-  override def computeVertexDegree(vertex: Vertex, graph: ScalaGraph): Future[Degree] = ???
+  override def computeVertexDegree(vertex: Vertex): Future[Option[Degree]] =
+    for {
+      inDegreeList <- vertex.inE.count.dedup().promise
+      outDegreeList <- vertex.outE.count.promise
+      inOpt = inDegreeList.headOption
+      outOpt = outDegreeList.headOption
+    } yield
+      for {
+        in <- inOpt
+        out <- outOpt
+      } yield Degree(in, out, in + out)
 
   override def computeNumberOfAdjacentVertexes(vertex: Vertex): Future[Long] = ???
 
@@ -59,8 +67,10 @@ final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: Executi
 
 object GremlinGraph {
 
-  def graph(conf: Configuration): ScalaGraph = TinkerGraph.open(conf).asScala //FIXME: add JanusGraphFactory.open(conf).asScala once I figure out the problem for "Packet <len12343123123> is out of range" o.O
-
+  def graph(conf: Configuration): ScalaGraph =
+    TinkerGraph
+      .open(conf)
+      .asScala //FIXME: add JanusGraphFactory.open(conf).asScala once I figure out the problem for "Packet <len12343123123> is out of range" o.O
 
   def apply[T <: Model](conf: Configuration)(implicit ec: ExecutionContext): Future[GremlinGraph[T]] = {
     implicit val graphParam: ScalaGraph = graph(conf)
@@ -68,4 +78,3 @@ object GremlinGraph {
   }
 
 }
-
