@@ -15,7 +15,7 @@ trait GraphOps[T <: Model] {
 
   def findLongestChain(graph: ScalaGraph): Future[Seq[Vertex]]
 
-  def computeVertexDegree(vertexLabel: Vertex): Future[Option[Degree]]
+  def computeVertexDegree(vertexLabel: Vertex): Future[Degree]
 
   def computeNumberOfAdjacentVertexes(vertex: Vertex): Future[Long]
 
@@ -47,17 +47,13 @@ final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: Executi
 
   override def findLongestChain(graph: ScalaGraph): Future[Seq[Vertex]] = ???
 
-  override def computeVertexDegree(vertex: Vertex): Future[Option[Degree]] =
+  override def computeVertexDegree(vertex: Vertex): Future[Degree] =
     for {
       inDegreeList <- vertex.inE.count.dedup().promise
       outDegreeList <- vertex.outE.count.promise
-      inOpt = inDegreeList.headOption
-      outOpt = outDegreeList.headOption
-    } yield
-      for {
-        in <- inOpt
-        out <- outOpt
-      } yield Degree(in, out, in + out)
+      in = inDegreeList.head
+      out = outDegreeList.head
+    } yield Degree(in, out, in + out)
 
   override def computeNumberOfAdjacentVertexes(vertex: Vertex): Future[Long] = ???
 
