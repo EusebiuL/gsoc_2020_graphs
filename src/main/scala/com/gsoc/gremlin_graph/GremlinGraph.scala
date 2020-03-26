@@ -58,7 +58,11 @@ final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: Executi
   override def computeNumberOfAdjacentVertices(vertex: Vertex): Future[Long] =
     vertex.both.count.promise.map(_.size)
 
-  override def extractVertexSubgraph(vertex: Vertex): Future[ScalaGraph] = ???
+  override def extractVertexSubgraph(vertex: Vertex): Future[ScalaGraph] = {
+    val stepLabel = StepLabel[Graph]("subGraph")
+    graph.traversal.V(vertex.id).inE().subgraph(stepLabel).outV.cap(stepLabel).promise.map(_.head.asScala)
+
+  }
 
 }
 
