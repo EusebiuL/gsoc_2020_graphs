@@ -35,13 +35,15 @@ final class AlertsProcessor(implicit ec: ExecutionContext) {
       parsedLines <- lines.fold(e => Future.failed(new RuntimeException(e.message)), s => Future.successful(s))
       constructedGraph <- graph.constructGraph(parsedLines)
       vertexList = constructedGraph.traversal.V.toList()
-      _ <- vertexList.traverse { vertex =>
+      degrees <- vertexList.traverse { vertex =>
         for {
           degree <- graph.computeVertexDegree(vertex)
           _ <- Future { logger.info(s"Degree for vertex $vertex: $degree") }
 
         } yield degree
       }
+      adjacentToZtf4 <- vertexList.find(_.label == "ztf4").traverse(graph.computeNumberOfAdjacentVertices)
+      _ <- Future { adjacentToZtf4.foreach(numberOfVertices => logger.info(s"Number of adjacent vertices to ztf4 is $numberOfVertices"))}
     } yield constructedGraph
 
   }
