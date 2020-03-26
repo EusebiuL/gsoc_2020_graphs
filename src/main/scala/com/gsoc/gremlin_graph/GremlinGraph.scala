@@ -49,13 +49,14 @@ final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: Executi
 
   override def computeVertexDegree(vertex: Vertex): Future[Degree] =
     for {
-      inDegreeList <- vertex.inE.count.dedup().promise
+      inDegreeList <- vertex.inE.count.promise
       outDegreeList <- vertex.outE.count.promise
       inDegree = inDegreeList.head
       outDegree = outDegreeList.head
     } yield Degree(inDegree, outDegree, inDegree + outDegree)
 
-  override def computeNumberOfAdjacentVertices(vertex: Vertex): Future[Long] = ???
+  override def computeNumberOfAdjacentVertices(vertex: Vertex): Future[Long] =
+    vertex.both.count.promise.map(_.size)
 
   override def extractVertexSubgraph(vertex: Vertex): Future[ScalaGraph] = ???
 
