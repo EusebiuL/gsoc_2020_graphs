@@ -28,6 +28,7 @@ final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: Executi
 
   override def constructGraph(vertices: Seq[T]): Future[ScalaGraph] =  Future {
     vertices.map {
+      //TODO: add conditions for when the value read is None
       case alert: Alert => {
         //add vertices
         val firstVertex = graph + alert.field1
