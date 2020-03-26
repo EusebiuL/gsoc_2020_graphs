@@ -44,6 +44,7 @@ final class AlertsProcessor(implicit ec: ExecutionContext) {
       }
       adjacentToZtf4 <- vertexList.find(_.label == "ztf4").traverse(graph.computeNumberOfAdjacentVertices)
       _ <- Future { adjacentToZtf4.foreach(numberOfVertices => logger.info(s"Number of adjacent vertices to ztf4 is $numberOfVertices"))}
+      unknownSubgraph <- vertexList.find(_.label == "unknown").traverse(graph.extractVertexSubgraph) //TODO: log the subgraph
     } yield constructedGraph
 
   }
