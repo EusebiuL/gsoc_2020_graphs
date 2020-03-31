@@ -2,6 +2,7 @@
 val tinkerGremlinV = "3.4.4"
 val gremlinV = "3.4.4.5"
 val csvParserV = "0.11.6"
+val catsV = "2.1.1"
 
 lazy val graph = (project in file("."))
   .settings(
@@ -22,6 +23,7 @@ lazy val graph = (project in file("."))
     resolvers += Resolver.bintrayRepo("zamblauskas", "maven"),
     fork in run := true,
     libraryDependencies ++= Seq(
+      "org.typelevel" %% "cats-core" % catsV withSources(),
       "com.michaelpollmeier" %% "gremlin-scala" % gremlinV withSources(),
       "org.apache.tinkerpop" % "gremlin-core" % "3.4.4" withSources(),
       "org.janusgraph" % "janusgraph-core" % "0.4.1" withSources(),
