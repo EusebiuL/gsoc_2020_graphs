@@ -3,12 +3,15 @@ package com.gsoc.gremlin_graph
 import com.gsoc.models.{Alert, Degree, Model}
 import gremlin.scala._
 import org.apache.commons.configuration.Configuration
-import org.apache.tinkerpop.gremlin.process.traversal.Path
+import org.apache.tinkerpop.gremlin.process.traversal.{AnonymousTraversalSource, Path}
 import org.apache.tinkerpop.gremlin.structure.Direction
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph
 import org.slf4j.LoggerFactory
-//import org.janusgraph.core.JanusGraphFactory
+import org.janusgraph.core.JanusGraphFactory
 import cats.implicits._
+import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection
+import org.apache.tinkerpop.gremlin.structure.util.empty.EmptyGraph
+
 import collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -71,18 +74,18 @@ final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: Executi
 
   override def computeVertexDegree(vertex: Vertex): Future[Degree] =
     for {
-      inDegreeList <- vertex.inE.count.promise
-      outDegreeList <- vertex.outE.count.promise
+      inDegreeList <- Future(vertex.inE.count)
+      outDegreeList <- Future(vertex.outE.count)
       inDegree = inDegreeList.head
       outDegree = outDegreeList.head
     } yield Degree(inDegree, outDegree, inDegree + outDegree)
 
   override def computeNumberOfAdjacentVertices(vertex: Vertex): Future[Long] =
-    vertex.both.count.promise.map(_.size)
+    Future(vertex.both.count.head)
 
-  override def extractVertexSubgraph(vertex: Vertex): Future[ScalaGraph] = {
+  override def extractVertexSubgraph(vertex: Vertex): Future[ScalaGraph] = Future {
     val stepLabel = StepLabel[Graph]("subGraph")
-    graph.traversal.V(vertex.id).inE().subgraph(stepLabel).outV.cap(stepLabel).promise.map(_.head.asScala)
+    graph.traversal.V(vertex.id).inE().subgraph(stepLabel).outV.cap(stepLabel).head.asScala
 
   }
 
