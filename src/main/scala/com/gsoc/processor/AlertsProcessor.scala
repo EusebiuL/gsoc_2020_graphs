@@ -35,7 +35,7 @@ final class AlertsProcessor(implicit ec: ExecutionContext) {
       lines <- Future { new CsvParser[T]().parse(fileAsString) }
       parsedLines <- lines.fold(e => Future.failed(new RuntimeException(e.message)), s => Future.successful(s))
       constructedGraph <- graph.constructGraph(parsedLines)
-      _ <- graph.printGraph
+      _ <- graph.printGraph(constructedGraph)
       vertexList = constructedGraph.traversal.V.toList()
       degrees <- vertexList.traverse { vertex =>
         for {
@@ -50,7 +50,7 @@ final class AlertsProcessor(implicit ec: ExecutionContext) {
           logger.info(s"Number of adjacent vertices to ztf4 is $numberOfVertices \n\n"))
       }
       unknownSubgraph <- vertexList.find(_.label == "unknown").traverse(graph.extractVertexSubgraph)
-      _ <- Future { logger.info(s"Subgraph for `unknown`: $unknownSubgraph \n\n") }
+      _ <- unknownSubgraph.traverse(graph.printGraph)
       longestChains <- graph.findLongestChains(constructedGraph)
       _ <- Future { longestChains.foreach(chain => logger.info(s"Chain: $chain \n")) }
     } yield constructedGraph

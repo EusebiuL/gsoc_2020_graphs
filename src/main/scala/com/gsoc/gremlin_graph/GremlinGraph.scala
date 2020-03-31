@@ -17,7 +17,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait GraphOps[T <: Model] {
 
-  def printGraph: Future[Unit]
+  def printGraph(graph: ScalaGraph): Future[Unit]
 
   def constructGraph(vertices: Seq[T]): Future[ScalaGraph]
 
@@ -35,7 +35,7 @@ final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: Executi
 
   private[this] val logger = LoggerFactory.getLogger(getClass)
 
-  override def printGraph: Future[Unit] = Future {
+  override def printGraph(graph: ScalaGraph): Future[Unit] = Future {
     graph.traversal.V.toList.foreach { vertex =>
       val edges = vertex.edges(Direction.OUT).asScala
       edges.foreach { edge =>
