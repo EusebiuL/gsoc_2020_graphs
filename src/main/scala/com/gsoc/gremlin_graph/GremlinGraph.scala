@@ -14,7 +14,7 @@ trait GraphOps[T <: Model] {
 
   def constructGraph(vertices: Seq[T]): Future[ScalaGraph]
 
-  def findLongestChain(graph: ScalaGraph): Future[List[Vertex]]
+  def findLongestChain(graph: ScalaGraph): Future[List[Path]]
 
   def computeVertexDegree(vertexLabel: Vertex): Future[Degree]
 
@@ -46,7 +46,7 @@ final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: Executi
     graph
   }
 
-  override def findLongestChain(graph: ScalaGraph): Future[List[Vertex]] = {
+  override def findLongestChain(graph: ScalaGraph): Future[List[Path]] = Future {
     val vertices = graph.traversal.V.toList
     findLongestChain(vertices)
   }
