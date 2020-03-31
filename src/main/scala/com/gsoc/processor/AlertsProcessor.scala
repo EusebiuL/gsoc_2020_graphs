@@ -50,9 +50,10 @@ final class AlertsProcessor(implicit ec: ExecutionContext) {
           logger.info(s"Number of adjacent vertices to ztf4 is $numberOfVertices \n\n"))
       }
       unknownSubgraph <- vertexList.find(_.label == "unknown").traverse(graph.extractVertexSubgraph)
+      _ <- Future {logger.info("Subgraph for `unknown`: \n\n")}
       _ <- unknownSubgraph.traverse(graph.printGraph)
-      longestChains <- graph.findLongestChains(constructedGraph)
-      _ <- Future { longestChains.foreach(chain => logger.info(s"Chain: $chain \n")) }
+    //  longestChains <- graph.findLongestChains(constructedGraph)
+    //  _ <- Future { longestChains.foreach(chain => logger.info(s"Chain: $chain \n")) }
     } yield constructedGraph
 
   }

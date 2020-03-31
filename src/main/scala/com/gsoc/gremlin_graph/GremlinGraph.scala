@@ -102,7 +102,7 @@ final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: Executi
   }
 
   private[this] def chainForVertexWithLength(vertex: Vertex): (Path, Long) = {
-    val path = vertex.start.repeat(_ => __.inE.outV).emit.tail.path
+    val path = vertex.start.repeat(_.inE.outV).emit.tail.path
     (path.head, path.unfold.count.head)
   }
 
