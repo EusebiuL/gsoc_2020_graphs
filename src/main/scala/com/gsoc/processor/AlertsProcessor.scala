@@ -10,6 +10,7 @@ import com.gsoc.models.Model
 import gremlin.scala.ScalaGraph
 import zamblauskas.csv.parser.ColumnReads
 import cats.implicits._
+
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
@@ -44,9 +45,10 @@ final class AlertsProcessor(implicit ec: ExecutionContext) {
       }
       adjacentToZtf4 <- vertexList.find(_.label == "ztf4").traverse(graph.computeNumberOfAdjacentVertices)
       _ <- Future { adjacentToZtf4.foreach(numberOfVertices => logger.info(s"Number of adjacent vertices to ztf4 is $numberOfVertices"))}
-      unknownSubgraph <- vertexList.find(_.label == "unknown").traverse(graph.extractVertexSubgraph) //TODO: log the subgraph
+      unknownSubgraph <- vertexList.find(_.label == "unknown").traverse(graph.extractVertexSubgraph)
+      _ <- Future { logger.info(s"Subgraph for `unknown`: $unknownSubgraph") }
       longestChains <- graph.findLongestChains(constructedGraph)
-
+      _ <- Future { longestChains.foreach(chain => logger.info(s"Chain: $chain")) }
     } yield constructedGraph
 
   }
