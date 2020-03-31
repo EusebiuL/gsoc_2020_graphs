@@ -4,13 +4,17 @@ import com.gsoc.models.{Alert, Degree, Model}
 import gremlin.scala._
 import org.apache.commons.configuration.Configuration
 import org.apache.tinkerpop.gremlin.process.traversal.Path
+import org.apache.tinkerpop.gremlin.structure.Direction
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph
+import org.slf4j.LoggerFactory
 //import org.janusgraph.core.JanusGraphFactory
 import cats.implicits._
-
+import collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
 
 trait GraphOps[T <: Model] {
+
+  def printGraph: Future[Unit]
 
   def constructGraph(vertices: Seq[T]): Future[ScalaGraph]
 
@@ -25,6 +29,20 @@ trait GraphOps[T <: Model] {
 }
 
 final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: ExecutionContext) extends GraphOps[T] {
+
+  private[this] val logger = LoggerFactory.getLogger(getClass)
+
+  override def printGraph: Future[Unit] = Future {
+    graph.traversal.V.toList.foreach { vertex =>
+      val edges = vertex.edges(Direction.OUT).asScala
+      edges.foreach { edge =>
+        val vertexLabel = vertex.label()
+        val edgeLabel = edge.label()
+        val otherVertexLabel = edge.inVertex().label()
+        logger.info(s"""$vertexLabel --"$edgeLabel" --> $otherVertexLabel \n""")
+      }
+    }
+  }
 
   override def constructGraph(vertices: Seq[T]): Future[ScalaGraph] = Future {
     vertices.map {
@@ -70,12 +88,12 @@ final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: Executi
 
   private[this] def findLongestChain(vertices: List[Vertex]): List[Path] = {
     val maximumLength = vertices.map(chainForVertexWithLength(_)._2).max
-    vertices.foldLeft(List.empty[Path]){ (paths, vertex) =>
+    vertices.foldLeft(List.empty[Path]) { (paths, vertex) =>
       val chainWithLength = chainForVertexWithLength(vertex)
       val path = chainWithLength._1
       val length = chainWithLength._2
-      if(length == maximumLength) {
-        path::paths
+      if (length == maximumLength) {
+        path :: paths
       } else paths
     }
   }

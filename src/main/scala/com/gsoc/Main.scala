@@ -35,17 +35,7 @@ object Main {
       result <- processor.startProcessor[Alert](graph)(Alert.alertReads)
     } yield result
     result.onComplete {
-      case Success(value) => {
-        value.traversal.V.toList.foreach { vertex =>
-          val edges = vertex.edges(Direction.OUT).asScala
-          edges.foreach { edge =>
-            val vertexLabel = vertex.label()
-            val edgeLabel = edge.label()
-            val otherVertexLabel = edge.inVertex().label()
-            logger.info(s"""$vertexLabel --"$edgeLabel" --> $otherVertexLabel \n""")
-            //TODO: refactor this to a method in GremlinGraph
-          }
-        }
+      case Success(_) => {
         sys.exit(0)
       }
       case Failure(exception) => {

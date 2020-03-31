@@ -35,20 +35,24 @@ final class AlertsProcessor(implicit ec: ExecutionContext) {
       lines <- Future { new CsvParser[T]().parse(fileAsString) }
       parsedLines <- lines.fold(e => Future.failed(new RuntimeException(e.message)), s => Future.successful(s))
       constructedGraph <- graph.constructGraph(parsedLines)
+      _ <- graph.printGraph
       vertexList = constructedGraph.traversal.V.toList()
       degrees <- vertexList.traverse { vertex =>
         for {
           degree <- graph.computeVertexDegree(vertex)
-          _ <- Future { logger.info(s"Degree for vertex $vertex: $degree") }
+          _ <- Future { logger.info(s"Degree for vertex $vertex: $degree \n\n") }
 
         } yield degree
       }
       adjacentToZtf4 <- vertexList.find(_.label == "ztf4").traverse(graph.computeNumberOfAdjacentVertices)
-      _ <- Future { adjacentToZtf4.foreach(numberOfVertices => logger.info(s"Number of adjacent vertices to ztf4 is $numberOfVertices"))}
+      _ <- Future {
+        adjacentToZtf4.foreach(numberOfVertices =>
+          logger.info(s"Number of adjacent vertices to ztf4 is $numberOfVertices \n\n"))
+      }
       unknownSubgraph <- vertexList.find(_.label == "unknown").traverse(graph.extractVertexSubgraph)
-      _ <- Future { logger.info(s"Subgraph for `unknown`: $unknownSubgraph") }
+      _ <- Future { logger.info(s"Subgraph for `unknown`: $unknownSubgraph \n\n") }
       longestChains <- graph.findLongestChains(constructedGraph)
-      _ <- Future { longestChains.foreach(chain => logger.info(s"Chain: $chain")) }
+      _ <- Future { longestChains.foreach(chain => logger.info(s"Chain: $chain \n")) }
     } yield constructedGraph
 
   }
