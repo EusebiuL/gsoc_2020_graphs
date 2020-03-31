@@ -3,6 +3,7 @@ package com.gsoc.gremlin_graph
 import com.gsoc.models.{Alert, Degree, Model}
 import gremlin.scala._
 import org.apache.commons.configuration.Configuration
+import org.apache.tinkerpop.gremlin.process.traversal.Path
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph
 //import org.janusgraph.core.JanusGraphFactory
 import cats.implicits._
@@ -13,7 +14,7 @@ trait GraphOps[T <: Model] {
 
   def constructGraph(vertices: Seq[T]): Future[ScalaGraph]
 
-  def findLongestChain(graph: ScalaGraph): Future[Seq[Vertex]]
+  def findLongestChain(graph: ScalaGraph): Future[List[Vertex]]
 
   def computeVertexDegree(vertexLabel: Vertex): Future[Degree]
 
@@ -45,7 +46,10 @@ final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: Executi
     graph
   }
 
-  override def findLongestChain(graph: ScalaGraph): Future[Seq[Vertex]] = ???
+  override def findLongestChain(graph: ScalaGraph): Future[List[Vertex]] = {
+    val vertices = graph.traversal.V.toList
+    findLongestChain(vertices)
+  }
 
   override def computeVertexDegree(vertex: Vertex): Future[Degree] =
     for {
@@ -62,6 +66,23 @@ final class GremlinGraph[T <: Model](implicit val graph: ScalaGraph, ec: Executi
     val stepLabel = StepLabel[Graph]("subGraph")
     graph.traversal.V(vertex.id).inE().subgraph(stepLabel).outV.cap(stepLabel).promise.map(_.head.asScala)
 
+  }
+
+  private[this] def findLongestChain(vertices: List[Vertex]): List[Path] = {
+    val maximumLength = vertices.map(chainForVertexWithLength(_)._2).max
+    vertices.foldLeft(List.empty[Path]){ (paths, vertex) =>
+      val chainWithLength = chainForVertexWithLength(vertex)
+      val path = chainWithLength._1
+      val length = chainWithLength._2
+      if(length == maximumLength) {
+        path::paths
+      } else paths
+    }
+  }
+
+  private[this] def chainForVertexWithLength(vertex: Vertex): (Path, Long) = {
+    val path = vertex.start.repeat(_ => __.inE.outV).emit.tail.path
+    (path.head, path.unfold.count.head)
   }
 
 }
